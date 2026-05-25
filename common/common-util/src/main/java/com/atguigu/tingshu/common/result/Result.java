@@ -19,7 +19,9 @@ public class Result<T> {
     //返回数据
     private T data;
 
-    public Result(){}
+    public Result(){
+
+    }
 
     // 返回数据
     protected static <T> Result<T> build(T data) {
