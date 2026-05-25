@@ -30,7 +30,6 @@ public class BaseCategoryApiController {
 
         List<JSONObject> list = baseCategoryService.getBaseCategoryList();
 
-
         return Result.ok(list);
     }
 
@@ -39,7 +38,6 @@ public class BaseCategoryApiController {
     public Result findAttribute(@PathVariable Long category1Id) {
 
         List<BaseAttribute> list = baseCategoryService.findAttribute(category1Id);
-
 
         return Result.ok(list);
     }
