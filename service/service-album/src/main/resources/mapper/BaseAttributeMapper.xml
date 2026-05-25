@@ -5,7 +5,30 @@
 
 
 <mapper namespace="com.atguigu.tingshu.album.mapper.BaseAttributeMapper">
+    
+    <resultMap id="baseAttributeMap"
+               type="com.atguigu.tingshu.model.album.BaseAttribute">
 
+
+
+    </resultMap>
+    
+    
+    <!-- 自定义返回结果-->
+    <select id="selectAttribute" resultMap="baseAttributeMap">
+        select ba.id,
+               ba.attribute_name,
+               ba.category1_id,
+               bav.id attribute_value_id,
+               bav.value_name,
+               bav.attribute_id
+        from base_attribute ba
+                 inner join base_attribute_value bav on ba.id = bav.attribute_id
+        where ba.category1_id = #{category1Id}
+        order by ba.id
+
+
+    </select>
 
 </mapper>
 

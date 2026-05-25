@@ -9,4 +9,8 @@ import java.util.List;
 
 public interface BaseCategoryService extends IService<BaseCategory1> {
 
+
+    List<JSONObject> getBaseCategoryList();
+
+    List<BaseAttribute> findAttribute(Long category1Id);
 }

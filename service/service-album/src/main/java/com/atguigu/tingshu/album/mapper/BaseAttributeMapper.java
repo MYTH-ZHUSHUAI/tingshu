@@ -10,4 +10,5 @@ import java.util.List;
 @Mapper
 public interface BaseAttributeMapper extends BaseMapper<BaseAttribute> {
 
+    List<BaseAttribute> selectAttribute(Long category1Id);
 }

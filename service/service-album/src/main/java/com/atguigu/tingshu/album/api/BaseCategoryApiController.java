@@ -6,6 +6,7 @@ import com.atguigu.tingshu.common.result.Result;
 import com.atguigu.tingshu.model.album.BaseAttribute;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,12 +18,32 @@ import java.util.List;
 
 @Tag(name = "分类管理")
 @RestController
-@RequestMapping(value="/api/album/category")
-@SuppressWarnings({"all"})
+@RequestMapping(value = "/api/album/category")
 public class BaseCategoryApiController {
-	
-	@Autowired
-	private BaseCategoryService baseCategoryService;
+
+    @Resource
+    private BaseCategoryService baseCategoryService;
+
+
+    @GetMapping("getBaseCategoryList")
+    public Result getBaseCategoryList() {
+
+        List<JSONObject> list = baseCategoryService.getBaseCategoryList();
+
+
+        return Result.ok(list);
+    }
+
+
+    @GetMapping("findAttribute/{category1Id}")
+    public Result findAttribute(@PathVariable Long category1Id) {
+
+        List<BaseAttribute> list = baseCategoryService.findAttribute(category1Id);
+
+
+        return Result.ok(list);
+    }
+
 
 }
 

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.io.Serial;
 import java.util.List;
 
 @Data
@@ -13,7 +14,8 @@ import java.util.List;
 @TableName("base_attribute")
 public class BaseAttribute extends BaseEntity {
 
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = 1L;
 
 	@Schema(description = "一级分类id")
 	@TableField("category1_id")
