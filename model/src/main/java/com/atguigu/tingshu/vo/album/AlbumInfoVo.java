@@ -4,6 +4,7 @@ import com.atguigu.tingshu.common.util.Decimal2Serializer;
 import com.atguigu.tingshu.validation.NotEmptyPaid;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;

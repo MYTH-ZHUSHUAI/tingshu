@@ -1,0 +1,22 @@
+package com.atguigu.tingshu.album.service.impl;
+
+import com.atguigu.tingshu.album.mapper.AlbumAttributeValueMapper;
+import com.atguigu.tingshu.album.mapper.BaseCategory1Mapper;
+import com.atguigu.tingshu.album.service.AlbumAttributeValueService;
+import com.atguigu.tingshu.model.album.AlbumAttributeValue;
+import com.atguigu.tingshu.model.album.BaseCategory1;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+/*
+ *@auther:zhushuai
+ *@verson 1.0
+ *@2026/5/27 12:31
+ */
+@Service
+@Slf4j
+public class AlbumAttributeValueServiceImpl
+        extends ServiceImpl<AlbumAttributeValueMapper, AlbumAttributeValue>
+        implements AlbumAttributeValueService {
+}
