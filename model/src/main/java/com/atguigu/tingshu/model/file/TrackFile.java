@@ -48,4 +48,12 @@ public class TrackFile extends BaseEntity {
     @Schema(description = "状态: 0-临时 1-已绑定 2-已废弃")
     @TableField("status")
     private Integer status;
+
+    @Schema(description = "文件MD5哈希")
+    @TableField("file_hash")
+    private String fileHash;
+
+    @Schema(description = "MinIO文件URL")
+    @TableField("file_url")
+    private String fileUrl;
 }

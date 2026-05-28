@@ -7,6 +7,8 @@ import com.atguigu.tingshu.album.service.TrackFileService;
 import com.atguigu.tingshu.album.service.TrackInfoService;
 import com.atguigu.tingshu.album.service.TrackStatService;
 import com.atguigu.tingshu.common.constant.SystemConstant;
+import com.atguigu.tingshu.common.execption.GuiguException;
+import com.atguigu.tingshu.common.result.ResultCodeEnum;
 import com.atguigu.tingshu.common.util.AuthContextHolder;
 import com.atguigu.tingshu.model.album.AlbumInfo;
 import com.atguigu.tingshu.model.album.TrackInfo;
@@ -108,14 +110,14 @@ public class TrackInfoServiceImpl extends ServiceImpl<TrackInfoMapper, TrackInfo
     }
 
     @Override
-    public TrackInfoVo getTrackInfo(Long trackId) {
+    public TrackInfo getTrackInfo(Long trackId) {
         TrackInfo trackInfo = this.getById(trackId);
+
         if (trackInfo == null) {
-            return null;
+            throw new GuiguException(ResultCodeEnum.DATA_ERROR);
         }
-        TrackInfoVo vo = new TrackInfoVo();
-        BeanUtils.copyProperties(trackInfo, vo);
-        return vo;
+
+        return trackInfo;
     }
 
     @Override

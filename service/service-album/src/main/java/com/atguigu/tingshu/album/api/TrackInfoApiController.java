@@ -1,15 +1,12 @@
 package com.atguigu.tingshu.album.api;
 
-import com.atguigu.tingshu.album.service.TrackFileService;
 import com.atguigu.tingshu.album.service.TrackInfoService;
 import com.atguigu.tingshu.album.service.VodService;
 import com.atguigu.tingshu.common.result.Result;
-import com.atguigu.tingshu.common.util.AuthContextHolder;
-import com.atguigu.tingshu.model.file.TrackFile;
+import com.atguigu.tingshu.model.album.TrackInfo;
 import com.atguigu.tingshu.query.album.TrackInfoQuery;
 import com.atguigu.tingshu.vo.album.TrackInfoVo;
 import com.atguigu.tingshu.vo.album.TrackListVo;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,30 +27,9 @@ public class TrackInfoApiController {
     @Resource
     private VodService vodService;
 
-    @Resource
-    private TrackFileService trackFileService;
-
     @PostMapping("uploadTrack")
     public Result<Map<String, Object>> uploadTrack(MultipartFile file) {
-
         Map<String, Object> map = vodService.uploadTrack(file);
-
-        // 写入业务文件表，refCount=0, status=0（临时状态）
-        String mediaFileId = (String) map.get("mediaFileId");
-        TrackFile existTrackFile = trackFileService.getOne(
-                new LambdaQueryWrapper<TrackFile>().eq(TrackFile::getMediaFileId, mediaFileId));
-        if (existTrackFile == null) {
-            TrackFile trackFile = new TrackFile();
-            trackFile.setFileName(file.getOriginalFilename());
-            trackFile.setMediaFileId(mediaFileId);
-            trackFile.setMediaUrl((String) map.get("mediaUrl"));
-            trackFile.setFileSize(file.getSize());
-            trackFile.setUploadUserId(AuthContextHolder.getUserId());
-            trackFile.setRefCount(0);
-            trackFile.setStatus(0);
-            trackFileService.save(trackFile);
-        }
-
         return Result.ok(map);
     }
 
@@ -79,9 +55,9 @@ public class TrackInfoApiController {
     }
 
     @GetMapping("getTrackInfo/{trackId}")
-    public Result<TrackInfoVo> getTrackInfo(@PathVariable Long trackId) {
-        TrackInfoVo vo = trackInfoService.getTrackInfo(trackId);
-        return Result.ok(vo);
+    public Result<TrackInfo> getTrackInfo(@PathVariable Long trackId) {
+        TrackInfo trackInfo = trackInfoService.getTrackInfo(trackId);
+        return Result.ok(trackInfo);
     }
 
     @PutMapping("updateTrackInfo/{trackId}")
