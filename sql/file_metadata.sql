@@ -1,5 +1,5 @@
 CREATE TABLE `file_metadata` (
-    `id` BIGINT NOT NULL COMMENT '主键',
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
     `file_name` VARCHAR(512) DEFAULT NULL COMMENT '原始文件名',
     `file_key` VARCHAR(256) DEFAULT NULL COMMENT '存储路径/对象名',
     `file_url` VARCHAR(1024) DEFAULT NULL COMMENT '完整访问URL',

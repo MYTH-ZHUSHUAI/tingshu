@@ -5,6 +5,8 @@ import com.atguigu.tingshu.album.mapper.AlbumStatMapper;
 import com.atguigu.tingshu.album.mapper.TrackInfoMapper;
 import com.atguigu.tingshu.album.service.AlbumAttributeValueService;
 import com.atguigu.tingshu.album.service.AlbumInfoService;
+import com.atguigu.tingshu.album.service.ImageFileService;
+import com.atguigu.tingshu.model.file.ImageFile;
 import com.atguigu.tingshu.common.constant.SystemConstant;
 import com.atguigu.tingshu.common.execption.GuiguException;
 import com.atguigu.tingshu.model.album.AlbumAttributeValue;
@@ -45,6 +47,9 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
     @Resource
     private TrackInfoMapper trackInfoMapper;
 
+    @Resource
+    private ImageFileService imageFileService;
+
 
     @Override
     public List<AlbumInfo> findUserAllAlbumList(Long userId) {
@@ -72,6 +77,10 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
     @Transactional
     public void updateAlbumInfo(AlbumInfoVo albumInfoVo, Long albumId) {
 
+        // 查询旧封面，用于后续引用计数比对
+        AlbumInfo oldAlbumInfo = this.getById(albumId);
+        String oldCoverUrl = oldAlbumInfo != null ? oldAlbumInfo.getCoverUrl() : null;
+
         AlbumInfo albumInfo = new AlbumInfo();
         BeanUtils.copyProperties(albumInfoVo, albumInfo);
         albumInfo.setId(albumId);
@@ -80,6 +89,28 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
             throw new GuiguException(400, "更新失败！");
         }
 
+        // 封面图变更时，旧图引用计数-1，新图+1
+        String newCoverUrl = albumInfoVo.getCoverUrl();
+        if (newCoverUrl != null && !newCoverUrl.equals(oldCoverUrl)) {
+            // 旧封面引用计数-1
+            if (oldCoverUrl != null) {
+                ImageFile oldImageFile = imageFileService.getOne(
+                        new LambdaQueryWrapper<ImageFile>().eq(ImageFile::getFileUrl, oldCoverUrl));
+                if (oldImageFile != null && oldImageFile.getRefCount() > 0) {
+                    oldImageFile.setRefCount(oldImageFile.getRefCount() - 1);
+                    oldImageFile.setStatus(oldImageFile.getRefCount() > 0 ? 1 : 0);
+                    imageFileService.updateById(oldImageFile);
+                }
+            }
+            // 新封面引用计数+1
+            ImageFile newImageFile = imageFileService.getOne(
+                    new LambdaQueryWrapper<ImageFile>().eq(ImageFile::getFileUrl, newCoverUrl));
+            if (newImageFile != null) {
+                newImageFile.setRefCount(newImageFile.getRefCount() + 1);
+                newImageFile.setStatus(1);
+                imageFileService.updateById(newImageFile);
+            }
+        }
 
         List<AlbumAttributeValueVo> albumAttributeValueVoList = albumInfoVo.getAlbumAttributeValueVoList();
 
@@ -156,8 +187,16 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
             this.removeById(albumId);
             albumAttributeValueService.remove(new LambdaQueryWrapper<AlbumAttributeValue>().eq(AlbumAttributeValue::getAlbumId, albumId));
             albumStatMapper.delete(new LambdaQueryWrapper<AlbumStat>().eq(AlbumStat::getAlbumId, albumId));
-        }
 
+            // 封面图片引用计数-1
+            ImageFile imageFile = imageFileService.getOne(
+                    new LambdaQueryWrapper<ImageFile>().eq(ImageFile::getFileUrl, albumInfo.getCoverUrl()));
+            if (imageFile != null && imageFile.getRefCount() > 0) {
+                imageFile.setRefCount(imageFile.getRefCount() - 1);
+                imageFile.setStatus(imageFile.getRefCount() > 0 ? 1 : 0);
+                imageFileService.updateById(imageFile);
+            }
+        }
 
     }
 
@@ -218,6 +257,15 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
         saveAlbumStat4Times(albumInfo, SystemConstant.ALBUM_STAT_SUBSCRIBE);
         saveAlbumStat4Times(albumInfo, SystemConstant.ALBUM_STAT_BROWSE);
         saveAlbumStat4Times(albumInfo, SystemConstant.ALBUM_STAT_COMMENT);
+
+        // 将封面图片引用计数+1，状态改为已绑定
+        ImageFile imageFile = imageFileService.getOne(
+                new LambdaQueryWrapper<ImageFile>().eq(ImageFile::getFileUrl, albumInfoVo.getCoverUrl()));
+        if (imageFile != null) {
+            imageFile.setRefCount(1);
+            imageFile.setStatus(1);
+            imageFileService.updateById(imageFile);
+        }
     }
 
 
