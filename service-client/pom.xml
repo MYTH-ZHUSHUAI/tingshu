@@ -16,6 +16,7 @@
 		<module>service-order-client</module>
 		<module>service-system-client</module>
 		<module>service-search-client</module>
+		<module>service-oss-client</module>
 	</modules>
 
 	<artifactId>service-client</artifactId>

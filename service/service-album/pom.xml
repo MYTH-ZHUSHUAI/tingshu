@@ -19,11 +19,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.qcloud</groupId>
             <artifactId>vod_api</artifactId>
             <!-- 版本冲突，排除 -->
