@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 
 @Data
@@ -13,7 +14,8 @@ import java.math.BigDecimal;
 @TableName("track_info")
 public class TrackInfo extends BaseEntity {
 
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = 1L;
 
 	@Schema(description = "用户id")
 	@TableField("user_id")

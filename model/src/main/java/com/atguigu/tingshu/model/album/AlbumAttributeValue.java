@@ -6,12 +6,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.io.Serial;
+
 
 @Data
 @Schema(description = "专辑属性值")
 public class AlbumAttributeValue extends BaseEntity {
 
-	private static final long serialVersionUID = 1L;
+	@Serial
+    private static final long serialVersionUID = 1L;
 
 	@Schema(description = "专辑id")
 	private Long albumId;
