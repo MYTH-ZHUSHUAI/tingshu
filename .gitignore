@@ -29,5 +29,4 @@ build/
 # Application
 application-local.yml
 application-dev.yml
-/资料/tempTrack/
-/资料/tempTrack/
+/资料
