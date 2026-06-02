@@ -21,6 +21,7 @@ public class OssProperties {
         private String accessKey;
         private String secretKey;
         private String bucketName;
+        private boolean publicRead = true;
     }
 
     @Data

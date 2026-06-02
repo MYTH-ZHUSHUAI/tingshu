@@ -50,4 +50,6 @@ public class AccReceiver {
     }
 
 
+    // todo 手动消息的问题
+
 }

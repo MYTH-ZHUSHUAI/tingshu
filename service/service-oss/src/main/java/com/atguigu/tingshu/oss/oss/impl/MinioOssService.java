@@ -7,6 +7,7 @@ import io.minio.GetObjectArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.SetBucketPolicyArgs;
 import jakarta.annotation.Resource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -56,11 +57,29 @@ public class MinioOssService implements OssService {
 
     private void ensureBucket() {
         try {
+            String bucketName = ossProperties.getMinio().getBucketName();
             boolean found = minioClient.bucketExists(
-                    BucketExistsArgs.builder().bucket(ossProperties.getMinio().getBucketName()).build());
+                    BucketExistsArgs.builder().bucket(bucketName).build());
             if (!found) {
                 minioClient.makeBucket(
-                        MakeBucketArgs.builder().bucket(ossProperties.getMinio().getBucketName()).build());
+                        MakeBucketArgs.builder().bucket(bucketName).build());
+            }
+            if (ossProperties.getMinio().isPublicRead()) {
+                String policy = """
+                        {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Principal": {"AWS": ["*"]},
+                                    "Action": ["s3:GetObject"],
+                                    "Resource": ["arn:aws:s3:::%s/*"]
+                                }
+                            ]
+                        }
+                        """.formatted(bucketName);
+                minioClient.setBucketPolicy(
+                        SetBucketPolicyArgs.builder().bucket(bucketName).config(policy).build());
             }
         } catch (Exception e) {
             throw new RuntimeException("MinIO bucket check failed", e);
