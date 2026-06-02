@@ -1,6 +1,7 @@
 package com.atguigu.tingshu.album.api;
 
 import com.atguigu.tingshu.album.service.AlbumInfoService;
+import com.atguigu.tingshu.common.login.TingshuLogin;
 import com.atguigu.tingshu.common.result.Result;
 import com.atguigu.tingshu.model.album.AlbumInfo;
 import com.atguigu.tingshu.query.album.AlbumInfoQuery;
@@ -29,6 +30,7 @@ public class AlbumInfoApiController {
      * 根据user分页查询所有专辑名称
      */
 //    @GetMapping("findUserAllAlbumList/{userId}")
+    @TingshuLogin()
     @GetMapping("findUserAllAlbumList")
     public Result<List<AlbumInfo>> findUserAllAlbumList() {
 
@@ -45,6 +47,7 @@ public class AlbumInfoApiController {
      * @param albumId
      * @return
      */
+    @TingshuLogin()
     @GetMapping("getAlbumInfo/{albumId}")
     public Result<AlbumInfo> getAlbumInfo(@PathVariable Long albumId) {
         AlbumInfo albumInfo = albumInfoService.getAlbumInfo(albumId);
@@ -56,6 +59,7 @@ public class AlbumInfoApiController {
      * 修改专辑信息
      *
      */
+    @TingshuLogin()
     @PutMapping("updateAlbumInfo/{albumId}")
     public Result<AlbumInfo> updateAlbumInfo(@RequestBody @Validated AlbumInfoVo albumInfoVo,
                                              @PathVariable Long albumId) {
@@ -67,6 +71,7 @@ public class AlbumInfoApiController {
     /**
      * 删除专辑
      */
+    @TingshuLogin()
     @DeleteMapping("removeAlbumInfo/{albumId}")
     public Result removeAlbumInfo(@PathVariable Long albumId) {
         albumInfoService.removeAlbumInfo(albumId);
@@ -76,6 +81,7 @@ public class AlbumInfoApiController {
     /**
      * 分页查询自己的专辑列表
      */
+    @TingshuLogin()
     @PostMapping("findUserAlbumPage/{startPage}/{limit}")
     public Result<IPage<AlbumListVo>> findUserAlbumPage(@RequestBody AlbumInfoQuery albumInfoQuery,
                                                         @PathVariable Long startPage,
@@ -94,6 +100,7 @@ public class AlbumInfoApiController {
      * @param albumInfoVo
      * @return
      */
+    @TingshuLogin()
     @PostMapping("saveAlbumInfo")
     public Result saveAlbumInfo(@RequestBody @Validated AlbumInfoVo albumInfoVo) {
 
