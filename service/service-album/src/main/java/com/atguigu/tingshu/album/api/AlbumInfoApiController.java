@@ -6,6 +6,7 @@ import com.atguigu.tingshu.common.result.Result;
 import com.atguigu.tingshu.model.album.AlbumAttributeValue;
 import com.atguigu.tingshu.model.album.AlbumInfo;
 import com.atguigu.tingshu.query.album.AlbumInfoQuery;
+import com.atguigu.tingshu.search.client.SearchFeignClient;
 import com.atguigu.tingshu.vo.album.AlbumInfoVo;
 import com.atguigu.tingshu.vo.album.AlbumListVo;
 import com.atguigu.tingshu.vo.album.AlbumStatVo;
@@ -26,6 +27,18 @@ public class AlbumInfoApiController {
     @Resource
     private AlbumInfoService albumInfoService;
 
+    @Resource
+    private SearchFeignClient searchFeignClient;
+
+
+    /**
+     * 上架专辑
+     */
+    @GetMapping("upperAlbum/{albumId}")
+    public Result upperAlbum(@PathVariable Long albumId) {
+        searchFeignClient.upperAlbum(albumId);
+        return Result.ok();
+    }
 
     /**
      * 根据userId分页查询所有专辑名称
