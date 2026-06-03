@@ -11,7 +11,7 @@
  Target Server Version : 80046 (8.0.46)
  File Encoding         : 65001
 
- Date: 27/05/2026 15:05:23
+ Date: 03/06/2026 15:58:50
 */
 
 SET NAMES utf8mb4;
@@ -33,7 +33,7 @@ CREATE TABLE `album_attribute_value` (
     PRIMARY KEY (`id`) USING BTREE,
     KEY `idx_album_id` (`album_id`),
     KEY `idx_value_id` (`value_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2210 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='专辑属性值关联表';
+) ENGINE=InnoDB AUTO_INCREMENT=2218 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='专辑属性值关联表';
 
 -- ----------------------------
 -- Table structure for album_info
@@ -67,7 +67,7 @@ CREATE TABLE `album_info` (
     `is_deleted` tinyint NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`),
     KEY `idx_category3_id` (`category3_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1594 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='专辑信息';
+) ENGINE=InnoDB AUTO_INCREMENT=1599 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='专辑信息';
 
 -- ----------------------------
 -- Table structure for album_stat
@@ -83,7 +83,7 @@ CREATE TABLE `album_stat` (
     `is_deleted` tinyint NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`),
     KEY `idx_album_id` (`album_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6373 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='专辑统计';
+) ENGINE=InnoDB AUTO_INCREMENT=6393 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='专辑统计';
 
 -- ----------------------------
 -- Table structure for base_attribute
@@ -163,6 +163,50 @@ CREATE TABLE `base_category3` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1402 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='三级分类表';
 
 -- ----------------------------
+-- Table structure for image_file
+-- ----------------------------
+DROP TABLE IF EXISTS `image_file`;
+CREATE TABLE `image_file` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `file_name` varchar(512) DEFAULT NULL COMMENT '原始文件名',
+    `file_url` varchar(1024) DEFAULT NULL COMMENT '完整访问URL',
+    `file_size` bigint DEFAULT NULL COMMENT '文件大小(字节)',
+    `storage_type` varchar(32) DEFAULT NULL COMMENT '存储类型: minio/aliyun/tencent',
+    `upload_user_id` bigint DEFAULT NULL COMMENT '上传用户ID',
+    `ref_count` int NOT NULL DEFAULT '0' COMMENT '引用计数，0-未绑定 >0-已绑定',
+    `status` tinyint NOT NULL DEFAULT '0' COMMENT '状态: 0-临时 1-已绑定 2-已废弃',
+    `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '逻辑删除',
+    PRIMARY KEY (`id`),
+    KEY `idx_upload_user_id` (`upload_user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='图片业务文件表';
+
+-- ----------------------------
+-- Table structure for track_file
+-- ----------------------------
+DROP TABLE IF EXISTS `track_file`;
+CREATE TABLE `track_file` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `file_name` varchar(512) DEFAULT NULL COMMENT '原始文件名',
+    `media_file_id` varchar(64) DEFAULT NULL COMMENT 'VOD媒体文件ID',
+    `media_url` varchar(1024) DEFAULT NULL COMMENT 'VOD播放地址',
+    `file_url` varchar(1024) DEFAULT NULL COMMENT 'MinIO文件URL',
+    `file_size` bigint DEFAULT NULL COMMENT '文件大小(字节)',
+    `media_duration` decimal(10, 2) DEFAULT NULL COMMENT '音频时长(秒)',
+    `upload_user_id` bigint DEFAULT NULL COMMENT '上传用户ID',
+    `ref_count` int NOT NULL DEFAULT '0' COMMENT '引用计数，0-未绑定 >0-已绑定',
+    `status` tinyint NOT NULL DEFAULT '0' COMMENT '状态: 0-临时 1-已绑定 2-已废弃',
+    `file_hash` varchar(64) DEFAULT NULL COMMENT '文件MD5哈希',
+    `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_deleted` tinyint NOT NULL DEFAULT '0' COMMENT '逻辑删除',
+    PRIMARY KEY (`id`),
+    KEY `idx_upload_user_id` (`upload_user_id`),
+    KEY `idx_file_hash` (`file_hash`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='声音业务文件表';
+
+-- ----------------------------
 -- Table structure for track_info
 -- ----------------------------
 DROP TABLE IF EXISTS `track_info`;
@@ -188,7 +232,7 @@ CREATE TABLE `track_info` (
     `is_deleted` tinyint NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`),
     KEY `idx_album_id` (`album_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51942 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='声音信息';
+) ENGINE=InnoDB AUTO_INCREMENT=51946 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='声音信息';
 
 -- ----------------------------
 -- Table structure for track_stat
@@ -204,7 +248,7 @@ CREATE TABLE `track_stat` (
     `is_deleted` tinyint NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`),
     KEY `idx_track_id` (`track_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=207762 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='声音统计';
+) ENGINE=InnoDB AUTO_INCREMENT=207778 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='声音统计';
 
 -- ----------------------------
 -- View structure for base_category_view

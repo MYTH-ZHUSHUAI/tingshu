@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "专辑详情管理")
 @RestController
 @RequestMapping("api/search/albumInfo")
-@SuppressWarnings({"all"})
 public class itemApiController {
 
 	@Autowired

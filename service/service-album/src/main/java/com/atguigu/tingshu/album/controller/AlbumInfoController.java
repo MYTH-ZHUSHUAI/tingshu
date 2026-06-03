@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "专辑管理")
 @RestController
 @RequestMapping("admin/album/albumInfo")
-@SuppressWarnings({"all"})
+
 public class AlbumInfoController {
 
 	@Autowired

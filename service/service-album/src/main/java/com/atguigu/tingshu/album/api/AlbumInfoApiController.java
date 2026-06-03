@@ -4,6 +4,7 @@ import com.atguigu.tingshu.album.service.AlbumInfoService;
 import com.atguigu.tingshu.common.login.TingshuLogin;
 import com.atguigu.tingshu.common.result.Result;
 import com.atguigu.tingshu.model.album.AlbumInfo;
+import com.atguigu.tingshu.model.album.BaseCategoryView;
 import com.atguigu.tingshu.query.album.AlbumInfoQuery;
 import com.atguigu.tingshu.vo.album.AlbumInfoVo;
 import com.atguigu.tingshu.vo.album.AlbumListVo;
@@ -27,9 +28,8 @@ public class AlbumInfoApiController {
 
 
     /**
-     * 根据user分页查询所有专辑名称
+     * 根据userId分页查询所有专辑名称
      */
-//    @GetMapping("findUserAllAlbumList/{userId}")
     @TingshuLogin()
     @GetMapping("findUserAllAlbumList")
     public Result<List<AlbumInfo>> findUserAllAlbumList() {
@@ -44,8 +44,6 @@ public class AlbumInfoApiController {
     /**
      * 根据 id 查询专辑信息
      *
-     * @param albumId
-     * @return
      */
     @TingshuLogin()
     @GetMapping("getAlbumInfo/{albumId}")
@@ -97,8 +95,6 @@ public class AlbumInfoApiController {
     /**
      * 新建专辑
      *
-     * @param albumInfoVo
-     * @return
      */
     @TingshuLogin()
     @PostMapping("saveAlbumInfo")

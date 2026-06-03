@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "VIP服务配置管理接口")
 @RestController
 @RequestMapping("api/user/vipServiceConfig")
-@SuppressWarnings({"all"})
 public class VipServiceConfigApiController {
 
 	@Autowired

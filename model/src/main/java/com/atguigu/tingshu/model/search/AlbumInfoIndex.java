@@ -12,6 +12,10 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 专辑索引，对应es中的表
+ */
+
 @Data
 @Document(indexName = "albuminfo")
 @JsonIgnoreProperties(ignoreUnknown = true)//目的：防止json字符串转成实体对象时因未识别字段报错

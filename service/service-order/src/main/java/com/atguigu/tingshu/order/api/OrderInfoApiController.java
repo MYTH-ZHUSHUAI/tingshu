@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "订单管理")
 @RestController
 @RequestMapping("api/order/orderInfo")
-@SuppressWarnings({"all"})
+
 public class OrderInfoApiController {
 
 	@Autowired

@@ -6,6 +6,7 @@ import com.atguigu.tingshu.album.service.BaseCategoryService;
 import com.atguigu.tingshu.model.album.BaseAttribute;
 import com.atguigu.tingshu.model.album.BaseCategory1;
 import com.atguigu.tingshu.model.album.BaseCategoryView;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@SuppressWarnings({"all"})
+
 public class BaseCategoryServiceImpl
         extends ServiceImpl<BaseCategory1Mapper, BaseCategory1>
         implements BaseCategoryService {
@@ -41,6 +42,22 @@ public class BaseCategoryServiceImpl
     @Override
     public List<BaseAttribute> findAttribute(Long category1Id) {
         return baseAttributeMapper.selectAttribute(category1Id);
+    }
+
+
+    /**
+     * 在视图中查询
+     *
+     * @param category3Id
+     * @return
+     */
+    @Override
+    public BaseCategoryView getCategoryView(Long category3Id) {
+        LambdaQueryWrapper<BaseCategoryView> baseCategoryViewLambdaQueryWrapper = new LambdaQueryWrapper<>();
+
+        baseCategoryViewLambdaQueryWrapper.eq(BaseCategoryView::getCategory3Id, category3Id);
+
+        return baseCategoryViewMapper.selectOne(baseCategoryViewLambdaQueryWrapper);
     }
 
 

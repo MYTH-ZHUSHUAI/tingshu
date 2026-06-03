@@ -145,7 +145,9 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 
         AlbumInfo albumInfo = this.getById(albumId);
 
-        List<AlbumAttributeValue> list = albumAttributeValueService.list(new LambdaQueryWrapper<AlbumAttributeValue>().eq(AlbumAttributeValue::getAlbumId, albumId));
+        List<AlbumAttributeValue> list = albumAttributeValueService
+                .list(new LambdaQueryWrapper<AlbumAttributeValue>()
+                        .eq(AlbumAttributeValue::getAlbumId, albumId));
 
         albumInfo.setAlbumAttributeValueVoList(list);
 

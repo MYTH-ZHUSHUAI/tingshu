@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "用户管理接口")
 @RestController
 @RequestMapping("admin/user/userInfo")
-@SuppressWarnings({"all"})
+
 public class UserInfoController {
 
 	@Autowired

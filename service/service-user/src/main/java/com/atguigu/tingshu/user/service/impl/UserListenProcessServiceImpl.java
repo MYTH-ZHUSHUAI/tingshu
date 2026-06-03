@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-@SuppressWarnings({"all"})
+
 public class UserListenProcessServiceImpl implements UserListenProcessService {
 
 	@Autowired

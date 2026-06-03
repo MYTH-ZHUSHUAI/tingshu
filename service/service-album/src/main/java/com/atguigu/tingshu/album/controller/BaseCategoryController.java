@@ -20,7 +20,7 @@ import java.util.List;
 @Tag(name = "分类管理")
 @RestController
 @RequestMapping(value="/admin/album/category")
-@SuppressWarnings({"all"})
+
 public class BaseCategoryController {
 	
 	@Autowired

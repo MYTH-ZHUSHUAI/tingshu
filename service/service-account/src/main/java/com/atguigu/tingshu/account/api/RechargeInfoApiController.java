@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "充值管理")
 @RestController
 @RequestMapping("api/account/rechargeInfo")
-@SuppressWarnings({"all"})
+
 public class RechargeInfoApiController {
 
 	@Autowired

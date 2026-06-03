@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "声音管理")
 @RestController
 @RequestMapping("admin/album/trackInfo")
-@SuppressWarnings({"all"})
+
 public class TrackInfoController {
 
 	@Autowired
