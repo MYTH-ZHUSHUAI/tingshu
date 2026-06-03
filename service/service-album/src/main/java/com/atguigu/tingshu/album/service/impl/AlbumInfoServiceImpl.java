@@ -17,6 +17,7 @@ import com.atguigu.tingshu.query.album.AlbumInfoQuery;
 import com.atguigu.tingshu.vo.album.AlbumAttributeValueVo;
 import com.atguigu.tingshu.vo.album.AlbumInfoVo;
 import com.atguigu.tingshu.vo.album.AlbumListVo;
+import com.atguigu.tingshu.vo.album.AlbumStatVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -145,9 +146,8 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 
         AlbumInfo albumInfo = this.getById(albumId);
 
-        List<AlbumAttributeValue> list = albumAttributeValueService
-                .list(new LambdaQueryWrapper<AlbumAttributeValue>()
-                        .eq(AlbumAttributeValue::getAlbumId, albumId));
+        List<AlbumAttributeValue> list = albumAttributeValueService.list(new LambdaQueryWrapper<AlbumAttributeValue>()
+                .eq(AlbumAttributeValue::getAlbumId, albumId));
 
         albumInfo.setAlbumAttributeValueVoList(list);
 
@@ -278,6 +278,31 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
         albumStat.setStatNum(0);
 
         albumStatMapper.insert(albumStat);
+    }
+
+    @Override
+    public AlbumStatVo getAlbumStatVo(Long albumId) {
+        List<AlbumStat> statList = albumStatMapper.selectList(
+                new LambdaQueryWrapper<AlbumStat>().eq(AlbumStat::getAlbumId, albumId));
+
+        AlbumStatVo vo = new AlbumStatVo();
+        vo.setAlbumId(albumId);
+
+        for (AlbumStat stat : statList) {
+            switch (stat.getStatType()) {
+                case SystemConstant.ALBUM_STAT_PLAY -> vo.setPlayStatNum(stat.getStatNum());
+                case SystemConstant.ALBUM_STAT_SUBSCRIBE -> vo.setSubscribeStatNum(stat.getStatNum());
+                case SystemConstant.ALBUM_STAT_BROWSE -> vo.setBuyStatNum(stat.getStatNum());
+                case SystemConstant.ALBUM_STAT_COMMENT -> vo.setCommentStatNum(stat.getStatNum());
+            }
+        }
+        return vo;
+    }
+
+    @Override
+    public List<AlbumAttributeValue> getAlbumAttributeValues(Long albumId) {
+        return albumAttributeValueService.list(
+                new LambdaQueryWrapper<AlbumAttributeValue>().eq(AlbumAttributeValue::getAlbumId, albumId));
     }
 
 }

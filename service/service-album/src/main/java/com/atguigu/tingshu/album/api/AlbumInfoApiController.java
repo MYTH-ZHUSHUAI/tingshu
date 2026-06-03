@@ -3,16 +3,16 @@ package com.atguigu.tingshu.album.api;
 import com.atguigu.tingshu.album.service.AlbumInfoService;
 import com.atguigu.tingshu.common.login.TingshuLogin;
 import com.atguigu.tingshu.common.result.Result;
+import com.atguigu.tingshu.model.album.AlbumAttributeValue;
 import com.atguigu.tingshu.model.album.AlbumInfo;
-import com.atguigu.tingshu.model.album.BaseCategoryView;
 import com.atguigu.tingshu.query.album.AlbumInfoQuery;
 import com.atguigu.tingshu.vo.album.AlbumInfoVo;
 import com.atguigu.tingshu.vo.album.AlbumListVo;
+import com.atguigu.tingshu.vo.album.AlbumStatVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +45,7 @@ public class AlbumInfoApiController {
      * 根据 id 查询专辑信息
      *
      */
-    @TingshuLogin()
+//    @TingshuLogin()
     @GetMapping("getAlbumInfo/{albumId}")
     public Result<AlbumInfo> getAlbumInfo(@PathVariable Long albumId) {
         AlbumInfo albumInfo = albumInfoService.getAlbumInfo(albumId);
@@ -103,6 +103,14 @@ public class AlbumInfoApiController {
         albumInfoService.saveAlbumInfo(albumInfoVo);
         return Result.ok();
     }
+
+    @GetMapping("getAlbumStatVo/{albumId}")
+    public Result<AlbumStatVo> getAlbumStatVo(@PathVariable Long albumId) {
+        return Result.ok(albumInfoService.getAlbumStatVo(albumId));
+    }
+
+    @GetMapping("getAlbumAttributeValues/{albumId}")
+    public Result<List<AlbumAttributeValue>> getAlbumAttributeValues(@PathVariable Long albumId) {
+        return Result.ok(albumInfoService.getAlbumAttributeValues(albumId));
+    }
 }
-
-

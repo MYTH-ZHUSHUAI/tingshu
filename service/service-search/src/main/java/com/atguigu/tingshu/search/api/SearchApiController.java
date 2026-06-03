@@ -20,6 +20,10 @@ public class SearchApiController {
     private SearchService searchService;
 
 
+    /**
+     * 上架专辑
+     *
+     */
     @GetMapping("upperAlbum/{albumId}")
     public Result upperAlbum(@PathVariable Long albumId) {
 

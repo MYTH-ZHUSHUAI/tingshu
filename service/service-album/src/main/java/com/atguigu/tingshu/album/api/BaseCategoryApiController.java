@@ -5,10 +5,8 @@ import com.atguigu.tingshu.album.service.BaseCategoryService;
 import com.atguigu.tingshu.common.result.Result;
 import com.atguigu.tingshu.model.album.BaseAttribute;
 import com.atguigu.tingshu.model.album.BaseCategoryView;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +25,7 @@ public class BaseCategoryApiController {
 
 
     @GetMapping("getCategoryView/{category3Id}")
-    Result<BaseCategoryView> getCategoryView(@PathVariable Long category3Id) {
+    public Result<BaseCategoryView> getCategoryView(@PathVariable Long category3Id) {
         BaseCategoryView baseCategoryView = baseCategoryService.getCategoryView(category3Id);
         return Result.ok(baseCategoryView);
     }
