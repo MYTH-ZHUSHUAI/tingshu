@@ -6,6 +6,8 @@ import com.atguigu.tingshu.album.mapper.TrackInfoMapper;
 import com.atguigu.tingshu.album.service.AlbumAttributeValueService;
 import com.atguigu.tingshu.album.service.AlbumInfoService;
 import com.atguigu.tingshu.album.service.ImageFileService;
+import com.atguigu.tingshu.common.rabbit.constant.MqConst;
+import com.atguigu.tingshu.common.rabbit.service.RabbitService;
 import com.atguigu.tingshu.model.file.ImageFile;
 import com.atguigu.tingshu.common.constant.SystemConstant;
 import com.atguigu.tingshu.common.execption.GuiguException;
@@ -50,6 +52,25 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 
     @Resource
     private ImageFileService imageFileService;
+
+
+    @Resource
+    private RabbitService rabbitService;
+
+
+    private void upperAlbum(Long albumId) {
+        rabbitService.sendMessage(
+                MqConst.EXCHANGE_ALBUM,
+                MqConst.ROUTING_ALBUM_UPPER,
+                albumId);
+    }
+
+    private void lowerAlbum(Long albumId) {
+        rabbitService.sendMessage(
+                MqConst.EXCHANGE_ALBUM,
+                MqConst.ROUTING_ALBUM_LOWER,
+                albumId);
+    }
 
 
     @Override
@@ -129,6 +150,13 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
         if (!CollectionUtils.isEmpty(albumAttributeValueVoList)) {
             albumAttributeValueService.saveBatch(albumAttributeValueList);
         }
+
+        if ("1".equals(albumInfo.getIsOpen())) {
+            upperAlbum(albumId);
+        } else if ("0".equals(albumInfo.getIsOpen())) {
+            lowerAlbum(albumId);
+        }
+
     }
 
 
@@ -196,6 +224,8 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
                 imageFileService.updateById(imageFile);
             }
         }
+
+        lowerAlbum(albumId);
 
     }
 
@@ -265,6 +295,14 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
             imageFile.setStatus(1);
             imageFileService.updateById(imageFile);
         }
+
+        if ("1".equals(albumInfo.getIsOpen())) {
+            upperAlbum(albumInfo.getId());
+        } else if ("0".equals(albumInfo.getIsOpen())) {
+            lowerAlbum(albumInfo.getId());
+        }
+
+
     }
 
 

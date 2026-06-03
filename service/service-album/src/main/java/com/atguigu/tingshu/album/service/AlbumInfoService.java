@@ -14,9 +14,7 @@ import java.util.List;
 
 public interface AlbumInfoService extends IService<AlbumInfo> {
 
-
     void saveAlbumInfo(AlbumInfoVo albumInfoVo);
-
 
     IPage<AlbumListVo> findUserAlbumPage(Page<AlbumListVo> page, AlbumInfoQuery albumInfoQuery);
 
