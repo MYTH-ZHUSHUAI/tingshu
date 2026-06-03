@@ -20,6 +20,5 @@ public interface AlbumInfoFeignClient {
     @GetMapping("api/album/albumInfo/getAlbumStatVo/{albumId}")
     Result<AlbumStatVo> getAlbumStatVo(@PathVariable Long albumId);
 
-    @GetMapping("api/album/albumInfo/getAlbumAttributeValues/{albumId}")
-    Result<List<AlbumAttributeValue>> getAlbumAttributeValues(@PathVariable Long albumId);
+
 }

@@ -48,32 +48,9 @@ public class SearchServiceImpl implements SearchService {
         }
         BeanUtils.copyProperties(albumInfo, albumInfoIndex);
         // BeanUtils 无法转换 Integer → String
-        albumInfoIndex.setIsFinished(albumInfo.getIsFinished() != null
-                ? albumInfo.getIsFinished().toString() : "0");
+        albumInfoIndex.setIsFinished(albumInfo.getIsFinished() != null ? albumInfo.getIsFinished().toString() : "0");
 
-        // 2. 分类信息
-        BaseCategoryView categoryView = categoryFeignClient.getCategoryView(albumInfo.getCategory3Id()).getData();
-        if (categoryView != null) {
-            albumInfoIndex.setCategory1Id(categoryView.getCategory1Id());
-            albumInfoIndex.setCategory2Id(categoryView.getCategory2Id());
-            albumInfoIndex.setCategory3Id(categoryView.getCategory3Id());
-        }
-
-        // 3. 主播信息
-        UserInfoVo userInfoVo = userInfoFeignClient.getUserInfoVo(albumInfo.getUserId()).getData();
-        albumInfoIndex.setAnnouncerName(userInfoVo != null ? userInfoVo.getNickname() : "");
-
-        // 4. 统计数据（播放量、订阅量、购买量、评论数）
-        AlbumStatVo statVo = albumInfoFeignClient.getAlbumStatVo(albumId).getData();
-        if (statVo != null) {
-            albumInfoIndex.setPlayStatNum(statVo.getPlayStatNum() != null ? statVo.getPlayStatNum() : 0);
-            albumInfoIndex.setSubscribeStatNum(statVo.getSubscribeStatNum() != null ? statVo.getSubscribeStatNum() : 0);
-            albumInfoIndex.setBuyStatNum(statVo.getBuyStatNum() != null ? statVo.getBuyStatNum() : 0);
-            albumInfoIndex.setCommentStatNum(statVo.getCommentStatNum() != null ? statVo.getCommentStatNum() : 0);
-        }
-
-
-        // 5. 专辑属性值
+        // 2. 专辑属性值
         List<AlbumAttributeValue> attrList = albumInfo.getAlbumAttributeValueVoList();
         if (attrList != null) {
             albumInfoIndex.setAttributeValueIndexList(attrList.stream().map(attr -> {
@@ -83,6 +60,31 @@ public class SearchServiceImpl implements SearchService {
                 return idx;
             }).toList());
         }
+
+
+        // 3. 分类信息
+        BaseCategoryView categoryView = categoryFeignClient.getCategoryView(albumInfo.getCategory3Id()).getData();
+        if (categoryView != null) {
+            albumInfoIndex.setCategory1Id(categoryView.getCategory1Id());
+            albumInfoIndex.setCategory2Id(categoryView.getCategory2Id());
+            albumInfoIndex.setCategory3Id(categoryView.getCategory3Id());
+        }
+
+        // 4. 主播信息
+        UserInfoVo userInfoVo = userInfoFeignClient.getUserInfoVo(albumInfo.getUserId()).getData();
+        albumInfoIndex.setAnnouncerName(userInfoVo != null ? userInfoVo.getNickname() : "");
+
+        // 5. 统计数据（播放量、订阅量、购买量、评论数）
+        AlbumStatVo statVo = albumInfoFeignClient.getAlbumStatVo(albumId).getData();
+        if (statVo != null) {
+            albumInfoIndex.setPlayStatNum(statVo.getPlayStatNum() != null ? statVo.getPlayStatNum() : 0);
+            albumInfoIndex.setSubscribeStatNum(statVo.getSubscribeStatNum() != null ? statVo.getSubscribeStatNum() : 0);
+            albumInfoIndex.setBuyStatNum(statVo.getBuyStatNum() != null ? statVo.getBuyStatNum() : 0);
+            albumInfoIndex.setCommentStatNum(statVo.getCommentStatNum() != null ? statVo.getCommentStatNum() : 0);
+        }
+
+
+
 
         // 6. 热度值
         albumInfoIndex.setHotScore(0d);

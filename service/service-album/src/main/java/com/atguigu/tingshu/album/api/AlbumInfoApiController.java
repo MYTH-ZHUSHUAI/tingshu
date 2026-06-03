@@ -55,7 +55,6 @@ public class AlbumInfoApiController {
 
     /**
      * 修改专辑信息
-     *
      */
     @TingshuLogin()
     @PutMapping("updateAlbumInfo/{albumId}")
@@ -104,13 +103,13 @@ public class AlbumInfoApiController {
         return Result.ok();
     }
 
+
+    /**
+     * 获取专辑统计信息
+     */
     @GetMapping("getAlbumStatVo/{albumId}")
     public Result<AlbumStatVo> getAlbumStatVo(@PathVariable Long albumId) {
         return Result.ok(albumInfoService.getAlbumStatVo(albumId));
     }
 
-    @GetMapping("getAlbumAttributeValues/{albumId}")
-    public Result<List<AlbumAttributeValue>> getAlbumAttributeValues(@PathVariable Long albumId) {
-        return Result.ok(albumInfoService.getAlbumAttributeValues(albumId));
-    }
 }

@@ -57,7 +57,6 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 
         Page<AlbumInfo> pageParam = new Page<>(1, 100);
 
-
         LambdaQueryWrapper<AlbumInfo> albumInfoLambdaQueryWrapper = new LambdaQueryWrapper<>();
         albumInfoLambdaQueryWrapper.select(AlbumInfo::getId, AlbumInfo::getAlbumTitle);
         albumInfoLambdaQueryWrapper.eq(AlbumInfo::getUserId, userId);
@@ -71,8 +70,6 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 
     /**
      * 更新专辑信息
-     *
-     * @param albumInfoVo
      */
     @Override
     @Transactional
@@ -298,11 +295,4 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
         }
         return vo;
     }
-
-    @Override
-    public List<AlbumAttributeValue> getAlbumAttributeValues(Long albumId) {
-        return albumAttributeValueService.list(
-                new LambdaQueryWrapper<AlbumAttributeValue>().eq(AlbumAttributeValue::getAlbumId, albumId));
-    }
-
 }

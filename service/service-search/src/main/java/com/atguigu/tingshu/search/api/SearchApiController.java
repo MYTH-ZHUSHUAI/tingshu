@@ -26,12 +26,9 @@ public class SearchApiController {
      */
     @GetMapping("upperAlbum/{albumId}")
     public Result upperAlbum(@PathVariable Long albumId) {
-
         searchService.upperAlbum(albumId);
-
         return Result.ok();
     }
-
 
 }
 

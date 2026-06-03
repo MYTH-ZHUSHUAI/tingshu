@@ -30,5 +30,4 @@ public interface AlbumInfoService extends IService<AlbumInfo> {
 
     AlbumStatVo getAlbumStatVo(Long albumId);
 
-    List<AlbumAttributeValue> getAlbumAttributeValues(Long albumId);
 }
