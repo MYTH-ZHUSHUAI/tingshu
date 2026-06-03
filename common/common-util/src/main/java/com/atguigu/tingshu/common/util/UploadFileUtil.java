@@ -16,7 +16,9 @@ public class UploadFileUtil {
      */
     @SneakyThrows
     public static String uploadTempPath(String tempPath, MultipartFile file) {
-        if (null == file) return "";
+        if (null == file) {
+            return "";
+        }
         String date = new DateTime().toString("yyyyMMdd");
         String filePath = tempPath + File.separator + date;
         File curFlie = new File(filePath);

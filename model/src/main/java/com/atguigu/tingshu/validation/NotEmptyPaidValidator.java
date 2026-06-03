@@ -9,8 +9,9 @@ public class NotEmptyPaidValidator implements ConstraintValidator<NotEmptyPaid, 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
         String[] array = value.split("_");
-        if(array.length == 0 || "0101".equals(array[0])) return true;
-        if(array.length != 2) return false;
-        return true;
+        if(array.length == 0 || "0101".equals(array[0])) {
+            return true;
+        }
+        return array.length == 2;
     }
 }
