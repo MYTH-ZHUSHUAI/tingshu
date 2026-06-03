@@ -30,5 +30,16 @@ public class SearchApiController {
         return Result.ok();
     }
 
+
+    /**
+     * 下架专辑
+     */
+    @GetMapping("lowerAlbum/{albumId}")
+    public Result lowerAlbum(@PathVariable Long albumId) {
+        searchService.lowerAlbum(albumId);
+        return Result.ok();
+    }
+
+
 }
 

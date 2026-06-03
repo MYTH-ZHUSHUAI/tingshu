@@ -42,6 +42,13 @@ public class SearchServiceImpl implements SearchService {
     @Resource
     private ThreadPoolExecutor albumUpperExecutor;
 
+
+    @Override
+    public void lowerAlbum(Long albumId) {
+        albumIndexRepository.deleteById(albumId);
+    }
+
+
     @Override
     public void upperAlbum(Long albumId) {
 
@@ -100,4 +107,6 @@ public class SearchServiceImpl implements SearchService {
         albumInfoIndex.setHotScore(0d);
         albumIndexRepository.save(albumInfoIndex);
     }
+
+
 }

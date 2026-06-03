@@ -32,6 +32,16 @@ public class AlbumInfoApiController {
 
 
     /**
+     * 下架专辑
+     */
+    @GetMapping("lowerAlbum/{albumId}")
+    public Result lowerAlbum(@PathVariable Long albumId) {
+        searchFeignClient.lowerAlbum(albumId);
+        return Result.ok();
+    }
+
+
+    /**
      * 上架专辑
      */
     @GetMapping("upperAlbum/{albumId}")

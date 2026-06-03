@@ -13,4 +13,10 @@ public class SearchDegradeFeignClient implements SearchFeignClient {
     public Result upperAlbum(Long albumId) {
         return Result.fail();
     }
+
+
+    @Override
+    public Result lowerAlbum(Long albumId) {
+        return Result.fail();
+    }
 }

@@ -22,4 +22,8 @@ public interface SearchFeignClient {
 
     @GetMapping("api/search/albumInfo/upperAlbum/{albumId}")
     Result upperAlbum(@PathVariable Long albumId);
+
+
+    @GetMapping("api/search/albumInfo/lowerAlbum/{albumId}")
+    Result lowerAlbum(@PathVariable Long albumId);
 }
