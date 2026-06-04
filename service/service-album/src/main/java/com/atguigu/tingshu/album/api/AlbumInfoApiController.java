@@ -42,11 +42,11 @@ public class AlbumInfoApiController {
 
 
     /**
-     * 上架专辑
+     * 上架专辑使用MQ，仅做测试
      */
     @GetMapping("upperAlbum/{albumId}")
     public Result upperAlbum(@PathVariable Long albumId) {
-        searchFeignClient.upperAlbum(albumId);
+        albumInfoService.upperAlbum(albumId);
         return Result.ok();
     }
 

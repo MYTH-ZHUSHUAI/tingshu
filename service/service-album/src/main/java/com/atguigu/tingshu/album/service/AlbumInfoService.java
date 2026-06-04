@@ -28,4 +28,5 @@ public interface AlbumInfoService extends IService<AlbumInfo> {
 
     AlbumStatVo getAlbumStatVo(Long albumId);
 
+    void upperAlbum(Long albumId);
 }

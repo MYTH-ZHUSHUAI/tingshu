@@ -58,7 +58,8 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
     private RabbitService rabbitService;
 
 
-    private void upperAlbum(Long albumId) {
+    @Override
+    public void upperAlbum(Long albumId) {
 
         log.info("准备发送消息：上架专辑：{}", albumId);
 
@@ -68,7 +69,7 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
                 albumId);
     }
 
-    private void lowerAlbum(Long albumId) {
+    public void lowerAlbum(Long albumId) {
 
 
         log.info("准备发送消息：下架专辑：{}", albumId);

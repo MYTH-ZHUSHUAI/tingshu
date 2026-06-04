@@ -14,7 +14,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class UpperAlbumTimingTest {
 
-    private static final String BASE_URL = "http://localhost:8502/api/search/albumInfo/upperAlbum/";
+
+    // 专辑服务，调用mq
+    private static final String BASE_URL1 = "http://localhost:8501/api/album/albumInfo/upperAlbum/";
+
+    // search服务，直接调用
+    private static final String BASE_URL2 = "http://localhost:8502/api/search/albumInfo/upperAlbum/";
     private static final int TOTAL = 1600;
     private static final int THREADS = 4;
 
@@ -34,7 +39,7 @@ public class UpperAlbumTimingTest {
                 long start = System.currentTimeMillis();
                 try {
                     ResponseEntity<String> response = restTemplate.getForEntity(
-                            BASE_URL + id, String.class);
+                            BASE_URL1 + id, String.class);
                     long elapsed = System.currentTimeMillis() - start;
 
                     if (response.getStatusCode() == HttpStatus.OK) {
