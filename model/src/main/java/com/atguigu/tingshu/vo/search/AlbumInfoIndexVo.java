@@ -28,7 +28,7 @@ public class AlbumInfoIndexVo {
     private Integer includeTrackCount;
 
     @Schema(description = "专辑是否完结：0-否；1-完结")
-    private String isFinished;
+    private Integer isFinished;
 
     @Schema(description = "付费类型: 0101-免费、0102-vip免费、0103-付费")
     private String payType;

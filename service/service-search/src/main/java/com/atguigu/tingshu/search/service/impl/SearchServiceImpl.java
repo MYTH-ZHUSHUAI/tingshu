@@ -1,12 +1,16 @@
 package com.atguigu.tingshu.search.service.impl;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
+import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
+import com.atguigu.tingshu.model.album.BaseCategory3;
 import com.atguigu.tingshu.vo.search.AlbumInfoIndexVo;
 import com.atguigu.tingshu.album.client.AlbumInfoFeignClient;
 import com.atguigu.tingshu.album.client.CategoryFeignClient;
@@ -23,6 +27,7 @@ import com.atguigu.tingshu.user.client.UserInfoFeignClient;
 import com.atguigu.tingshu.vo.album.AlbumStatVo;
 import com.atguigu.tingshu.vo.search.AlbumSearchResponseVo;
 import com.atguigu.tingshu.vo.user.UserInfoVo;
+import com.alibaba.fastjson.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -31,11 +36,14 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -59,6 +67,97 @@ public class SearchServiceImpl implements SearchService {
     // 根据yml配置自动创建client
     @Resource
     private ElasticsearchClient elasticsearchClient;
+
+
+    /**
+     * 使用es查询
+     * 根据category1Id查询所有三级分类，根据热度排序
+     */
+    @Override
+    public List<Map<String, Object>> channel(Long category1Id) {
+        List<BaseCategory3> topCategories = categoryFeignClient.findTopBaseCategory3(category1Id).getData();
+        if (CollectionUtils.isEmpty(topCategories)) {
+            return List.of();
+        }
+
+        Map<Long, BaseCategory3> category3IdToMap = topCategories.stream()
+                .collect(Collectors.toMap(BaseCategory3::getId, c -> c));
+
+        List<Long> category3Ids = topCategories.stream().map(BaseCategory3::getId).toList();
+
+        SearchRequest request = buildChannelDsl(category3Ids);
+
+        SearchResponse<AlbumInfoIndex> response;
+        try {
+            response = elasticsearchClient.search(request, AlbumInfoIndex.class);
+        } catch (IOException e) {
+            throw new GuiguException(500, "查询失败");
+        }
+
+        return parseChannelResult(response, category3IdToMap);
+    }
+
+    private SearchRequest buildChannelDsl(List<Long> category3Ids) {
+        SearchRequest.Builder reqBuilder = new SearchRequest.Builder();
+        reqBuilder.index("albuminfo");
+        reqBuilder.size(0);
+
+        reqBuilder.query(q -> q.terms(t -> t
+                .field("category3Id")
+                .terms(tf -> tf.value(category3Ids.stream().map(FieldValue::of).toList()))
+        ));
+
+        reqBuilder.aggregations("groupByCategory3IdAgg", a -> a
+                .terms(t -> t.field("category3Id").size(7))
+                .aggregations("topTenHotScoreAgg", sa -> sa
+                        .topHits(th -> th
+                                .size(6)
+                                .sort(s -> s.field(f -> f.field("hotScore").order(SortOrder.Desc)))
+                                .source(src -> src.filter(f -> f.excludes("attributeValueIndexList")))
+                        )
+                )
+        );
+
+        return reqBuilder.build();
+    }
+
+    private List<Map<String, Object>> parseChannelResult(SearchResponse<AlbumInfoIndex> response,
+                                                         Map<Long, BaseCategory3> category3IdToMap) {
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        Map<String, Aggregate> aggs = response.aggregations();
+        if (aggs == null) {
+            return result;
+        }
+
+        Aggregate categoryAgg = aggs.get("groupByCategory3IdAgg");
+        if (categoryAgg == null || !categoryAgg.isLterms()) {
+            return result;
+        }
+
+        List<LongTermsBucket> buckets = categoryAgg.lterms().buckets().array();
+        for (LongTermsBucket bucket : buckets) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("baseCategory3", category3IdToMap.get(bucket.key()));
+
+            Aggregate topAlbumsAgg = bucket.aggregations().get("topTenHotScoreAgg");
+            if (topAlbumsAgg != null && topAlbumsAgg.isTopHits()) {
+                List<AlbumInfoIndex> albums = topAlbumsAgg.topHits().hits().hits().stream()
+                        .map(hit -> {
+                            String json = hit.source().toString();
+                            return JSON.parseObject(json, AlbumInfoIndex.class);
+                        }).toList();
+                map.put("list", albums);
+            } else {
+                map.put("list", List.of());
+            }
+
+            result.add(map);
+        }
+
+        return result;
+    }
+
 
     /**
      * 使用es查询专辑 - 主流程
@@ -87,6 +186,7 @@ public class SearchServiceImpl implements SearchService {
         return responseVO;
     }
 
+
     /**
      * 构建查询dsl语句
      */
@@ -98,10 +198,6 @@ public class SearchServiceImpl implements SearchService {
         Long category3Id = albumIndexQuery.getCategory3Id();
         List<String> attributeList = albumIndexQuery.getAttributeList();
         String order = albumIndexQuery.getOrder();
-
-        if (!StringUtils.hasText(keyword)) {
-            throw new GuiguException(400, "关键词不能为空");
-        }
 
         SearchRequest.Builder reqBuilder = new SearchRequest.Builder();
         BoolQuery.Builder boolQuery = new BoolQuery.Builder();
@@ -280,7 +376,7 @@ public class SearchServiceImpl implements SearchService {
                 + Math.log10(buyNum + 1) / 5.0 * 35
                 + Math.log10(commentNum + 1) / 5.0 * 15;
         albumInfoIndex.setHotScore(hotScore);
-        
+
         albumIndexRepository.save(albumInfoIndex);
     }
 

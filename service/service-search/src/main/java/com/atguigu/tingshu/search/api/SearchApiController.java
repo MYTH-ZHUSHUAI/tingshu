@@ -11,6 +11,10 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 @Tag(name = "搜索专辑管理")
 @RestController
 @RequestMapping("api/search/albumInfo")
@@ -19,6 +23,16 @@ public class SearchApiController {
     @Resource
     private SearchService searchService;
 
+
+    /**
+     * 首页专辑搜索
+     */
+    @Operation(summary = "获取频道页数据")
+    @GetMapping("channel/{category1Id}")
+    public Result channel(@PathVariable Long category1Id) {
+        List<Map<String, Object>> mapList = searchService.channel(category1Id);
+        return Result.ok(mapList);
+    }
 
     /**
      * 使用es查询专辑
