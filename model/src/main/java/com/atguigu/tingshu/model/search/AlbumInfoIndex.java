@@ -46,8 +46,8 @@ public class AlbumInfoIndex implements Serializable {
     private Integer includeTrackCount;
 
     //专辑是否完结：0-否；1-完结
-    @Field(type = FieldType.Long, index = false)
-    private String isFinished;
+    @Field(type = FieldType.Integer, index = false)
+    private Integer isFinished;
 
     //付费类型：免费、vip免费、付费
     @Field(type = FieldType.Keyword, index = false)
@@ -81,7 +81,7 @@ public class AlbumInfoIndex implements Serializable {
     @Field(type = FieldType.Integer)
     private Integer commentStatNum = 0;
 
-    //  商品的热度！
+    //  商品的热度
     @Field(type = FieldType.Double)
     private Double hotScore = 0d;
 

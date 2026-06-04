@@ -1,8 +1,13 @@
 package com.atguigu.tingshu.search.service.impl;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
+import com.atguigu.tingshu.vo.search.AlbumInfoIndexVo;
 import com.atguigu.tingshu.album.client.AlbumInfoFeignClient;
 import com.atguigu.tingshu.album.client.CategoryFeignClient;
 import com.atguigu.tingshu.common.execption.GuiguException;
@@ -22,10 +27,14 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
@@ -69,9 +78,6 @@ public class SearchServiceImpl implements SearchService {
         }
         //  3. 得到返回的结果集
         AlbumSearchResponseVo responseVO = this.parseSearchResult(response);
-        if (responseVO == null){
-            throw new GuiguException(500, "查询结果为空");
-        }
 
         responseVO.setPageSize(albumIndexQuery.getPageSize());
         responseVO.setPageNo(albumIndexQuery.getPageNo());
@@ -92,17 +98,84 @@ public class SearchServiceImpl implements SearchService {
         Long category3Id = albumIndexQuery.getCategory3Id();
         List<String> attributeList = albumIndexQuery.getAttributeList();
         String order = albumIndexQuery.getOrder();
-        Integer pageNo = albumIndexQuery.getPageNo();
-        Integer pageSize = albumIndexQuery.getPageSize();
 
-        // 1. 创建查询请求
-        SearchRequest.Builder reqbuilder = new SearchRequest.Builder();
+        if (!StringUtils.hasText(keyword)) {
+            throw new GuiguException(400, "关键词不能为空");
+        }
 
+        SearchRequest.Builder reqBuilder = new SearchRequest.Builder();
+        BoolQuery.Builder boolQuery = new BoolQuery.Builder();
 
+        // must: match_all 保证永远不空
+        boolQuery.must(m -> m.matchAll(f -> f));
 
+        // should: 关键词命中加分
+        boolQuery.should(s -> s.match(m -> m.field("albumTitle").query(keyword)));
+        boolQuery.should(s -> s.match(m -> m.field("albumIntro").query(keyword)));
 
+        // 高亮
+        reqBuilder.highlight(h -> h
+                .fields("albumTitle", f -> f.preTags("<span style=color:red>").postTags("</span>"))
+                .fields("albumIntro", f -> f.preTags("<span style=color:red>").postTags("</span>")));
 
-        return null;
+        // filter: 分类
+        if (category1Id != null) {
+            boolQuery.filter(f -> f.term(t -> t.field("category1Id").value(category1Id)));
+        }
+        if (category2Id != null) {
+            boolQuery.filter(f -> f.term(t -> t.field("category2Id").value(category2Id)));
+        }
+        if (category3Id != null) {
+            boolQuery.filter(f -> f.term(t -> t.field("category3Id").value(category3Id)));
+        }
+
+        // filter: 属性 nested 查询
+        if (!CollectionUtils.isEmpty(attributeList)) {
+            for (String attribute : attributeList) {
+                String[] split = attribute.split(":");
+                if (split.length == 2) {
+                    boolQuery.filter(f -> f.nested(n -> n
+                            .path("attributeValueIndexList")
+                            .query(q -> q.bool(b -> b
+                                    .must(m -> m.term(t -> t.field("attributeValueIndexList.attributeId").value(Long.valueOf(split[0]))))
+                                    .must(m -> m.term(t -> t.field("attributeValueIndexList.valueId").value(Long.valueOf(split[1]))))
+                            ))));
+                }
+            }
+        }
+
+        // 排序
+        if (!StringUtils.hasText(order)) {
+            // 默认: _score 优先，hotScore 辅助
+            reqBuilder.sort(s -> s.field(f -> f.field("_score").order(SortOrder.Desc)));
+            reqBuilder.sort(s -> s.field(f -> f.field("hotScore").order(SortOrder.Desc)));
+        } else {
+            String[] split = order.split(":");
+            if (split.length == 2) {
+                String orderField = switch (split[0]) {
+                    case "1" -> "hotScore";
+                    case "2" -> "playStatNum";
+                    case "3" -> "createTime";
+                    default -> null;
+                };
+                if (orderField != null) {
+                    SortOrder sortOrder = "asc".equals(split[1]) ? SortOrder.Asc : SortOrder.Desc;
+                    reqBuilder.sort(s -> s.field(f -> f.field(orderField).order(sortOrder)));
+                }
+            }
+            reqBuilder.sort(s -> s.field(f -> f.field("_score").order(SortOrder.Desc)));
+        }
+
+        // 字段过滤
+        reqBuilder.source(s -> s.filter(f -> f.excludes("attributeValueIndexList")));
+
+        // 分页
+        int from = (albumIndexQuery.getPageNo() - 1) * albumIndexQuery.getPageSize();
+        reqBuilder.from(from);
+        reqBuilder.size(albumIndexQuery.getPageSize());
+
+        reqBuilder.index("albuminfo").query(q -> q.bool(boolQuery.build()));
+        return reqBuilder.build();
     }
 
 
@@ -110,9 +183,30 @@ public class SearchServiceImpl implements SearchService {
      * 解析查询结果
      */
     private AlbumSearchResponseVo parseSearchResult(SearchResponse<AlbumInfoIndex> response) {
+        AlbumSearchResponseVo searchResponseVo = new AlbumSearchResponseVo();
+        HitsMetadata<AlbumInfoIndex> hits = response.hits();
+        searchResponseVo.setTotal(hits.total().value());
 
+        List<Hit<AlbumInfoIndex>> hitList = hits.hits();
+        if (!CollectionUtils.isEmpty(hitList)) {
+            List<AlbumInfoIndexVo> list = hitList.stream().map(hit -> {
+                AlbumInfoIndexVo vo = new AlbumInfoIndexVo();
+                BeanUtils.copyProperties(hit.source(), vo);
 
-        return null;
+                Map<String, List<String>> highlightFields = hit.highlight();
+                if (highlightFields != null) {
+                    if (highlightFields.containsKey("albumTitle")) {
+                        vo.setAlbumTitle(highlightFields.get("albumTitle").get(0));
+                    }
+                    if (highlightFields.containsKey("albumIntro")) {
+                        vo.setAlbumIntro(highlightFields.get("albumIntro").get(0));
+                    }
+                }
+                return vo;
+            }).toList();
+            searchResponseVo.setList(list);
+        }
+        return searchResponseVo;
     }
 
 
@@ -143,7 +237,6 @@ public class SearchServiceImpl implements SearchService {
         CompletableFuture<UserInfoVo> userFuture = CompletableFuture.supplyAsync(
                 () -> userInfoFeignClient.getUserInfoVo(albumInfo.getUserId()).getData(), albumUpperExecutor);
 
-        // 等待剩余结果
         AlbumStatVo statVo = statFuture.join();
         BaseCategoryView categoryView = categoryFuture.join();
         UserInfoVo userInfoVo = userFuture.join();
@@ -151,7 +244,6 @@ public class SearchServiceImpl implements SearchService {
         // 组装 AlbumInfoIndex
         AlbumInfoIndex albumInfoIndex = new AlbumInfoIndex();
         BeanUtils.copyProperties(albumInfo, albumInfoIndex);
-        albumInfoIndex.setIsFinished(albumInfo.getIsFinished() != null ? albumInfo.getIsFinished().toString() : "0");
 
         List<AlbumAttributeValue> attrList = albumInfo.getAlbumAttributeValueVoList();
         if (attrList != null) {
@@ -171,14 +263,24 @@ public class SearchServiceImpl implements SearchService {
 
         albumInfoIndex.setAnnouncerName(userInfoVo != null ? userInfoVo.getNickname() : "");
 
-        if (statVo != null) {
-            albumInfoIndex.setPlayStatNum(statVo.getPlayStatNum() != null ? statVo.getPlayStatNum() : 0);
-            albumInfoIndex.setSubscribeStatNum(statVo.getSubscribeStatNum() != null ? statVo.getSubscribeStatNum() : 0);
-            albumInfoIndex.setBuyStatNum(statVo.getBuyStatNum() != null ? statVo.getBuyStatNum() : 0);
-            albumInfoIndex.setCommentStatNum(statVo.getCommentStatNum() != null ? statVo.getCommentStatNum() : 0);
-        }
 
-        albumInfoIndex.setHotScore(0d);
+        // todo 使用数据库真实数据
+        int playNum = ThreadLocalRandom.current().nextInt(1, 10_000_001);
+        int subscribeNum = ThreadLocalRandom.current().nextInt(1, 10_000_001);
+        int buyNum = ThreadLocalRandom.current().nextInt(1, 100_001);
+        int commentNum = ThreadLocalRandom.current().nextInt(1, 100_001);
+
+        albumInfoIndex.setPlayStatNum(playNum);
+        albumInfoIndex.setSubscribeStatNum(subscribeNum);
+        albumInfoIndex.setBuyStatNum(buyNum);
+        albumInfoIndex.setCommentStatNum(commentNum);
+
+        double hotScore = Math.log10(playNum + 1) / 7.0 * 20
+                + Math.log10(subscribeNum + 1) / 7.0 * 30
+                + Math.log10(buyNum + 1) / 5.0 * 35
+                + Math.log10(commentNum + 1) / 5.0 * 15;
+        albumInfoIndex.setHotScore(hotScore);
+        
         albumIndexRepository.save(albumInfoIndex);
     }
 
