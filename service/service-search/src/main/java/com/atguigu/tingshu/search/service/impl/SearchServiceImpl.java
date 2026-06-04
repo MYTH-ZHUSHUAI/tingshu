@@ -2,8 +2,6 @@ package com.atguigu.tingshu.search.service.impl;
 
 import com.atguigu.tingshu.album.client.AlbumInfoFeignClient;
 import com.atguigu.tingshu.album.client.CategoryFeignClient;
-import com.atguigu.tingshu.common.execption.GuiguException;
-import com.atguigu.tingshu.common.result.ResultCodeEnum;
 import com.atguigu.tingshu.model.album.AlbumAttributeValue;
 import com.atguigu.tingshu.model.album.AlbumInfo;
 import com.atguigu.tingshu.model.album.BaseCategoryView;
@@ -60,7 +58,8 @@ public class SearchServiceImpl implements SearchService {
 
         AlbumInfo albumInfo = albumFuture.join();
         if (albumInfo == null) {
-            throw new GuiguException(ResultCodeEnum.DATA_ERROR);
+            log.warn("专辑不存在，跳过上架，albumId: {}", albumId);
+            return;
         }
 
         // Phase 2: 并行获取分类信息 + 主播信息（依赖 albumInfo）
