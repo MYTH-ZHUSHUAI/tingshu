@@ -59,6 +59,9 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 
 
     private void upperAlbum(Long albumId) {
+
+        log.info("准备发送消息：上架专辑：{}", albumId);
+
         rabbitService.sendMessage(
                 MqConst.EXCHANGE_ALBUM,
                 MqConst.ROUTING_ALBUM_UPPER,
@@ -66,6 +69,10 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
     }
 
     private void lowerAlbum(Long albumId) {
+
+
+        log.info("准备发送消息：下架专辑：{}", albumId);
+
         rabbitService.sendMessage(
                 MqConst.EXCHANGE_ALBUM,
                 MqConst.ROUTING_ALBUM_LOWER,
@@ -131,6 +138,16 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
             }
         }
 
+        // 上架与下架
+        if ("1".equals(albumInfo.getIsOpen())) {
+            log.info("上架专辑：{}", albumId);
+            upperAlbum(albumId);
+        } else if ("0".equals(albumInfo.getIsOpen())) {
+            log.info("下架专辑：{}", albumId);
+            lowerAlbum(albumId);
+        }
+
+
         List<AlbumAttributeValueVo> albumAttributeValueVoList = albumInfoVo.getAlbumAttributeValueVoList();
 
         if (CollectionUtils.isEmpty(albumAttributeValueVoList)) {
@@ -151,11 +168,7 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
             albumAttributeValueService.saveBatch(albumAttributeValueList);
         }
 
-        if ("1".equals(albumInfo.getIsOpen())) {
-            upperAlbum(albumId);
-        } else if ("0".equals(albumInfo.getIsOpen())) {
-            lowerAlbum(albumId);
-        }
+
 
     }
 
