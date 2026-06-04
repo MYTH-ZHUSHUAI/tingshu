@@ -121,7 +121,6 @@ public class AlbumInfoApiController {
     @TingshuLogin()
     @PostMapping("saveAlbumInfo")
     public Result saveAlbumInfo(@RequestBody @Validated AlbumInfoVo albumInfoVo) {
-
         albumInfoService.saveAlbumInfo(albumInfoVo);
         return Result.ok();
     }
