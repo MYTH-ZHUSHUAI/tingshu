@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,9 +36,14 @@ public class BaseCategoryApiController {
 
     @GetMapping("getBaseCategoryList")
     public Result getBaseCategoryList() {
-
         List<JSONObject> list = baseCategoryService.getBaseCategoryList();
+        return Result.ok(list);
+    }
 
+
+    @GetMapping("getBaseCategoryList/{category1Id}")
+    public Result getBaseCategoryListById(@PathVariable Long category1Id) {
+        JSONObject list = baseCategoryService.getBaseCategoryListById(category1Id);
         return Result.ok(list);
     }
 

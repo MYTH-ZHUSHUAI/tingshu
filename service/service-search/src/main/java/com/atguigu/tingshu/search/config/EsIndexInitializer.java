@@ -1,6 +1,7 @@
 package com.atguigu.tingshu.search.config;
 
 import com.atguigu.tingshu.model.search.AlbumInfoIndex;
+import com.atguigu.tingshu.model.search.SuggestIndex;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -9,6 +10,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.logging.Logger;
 
+
+
+/**
+ * es索引初始化
+ */
 @Component
 public class EsIndexInitializer {
 
@@ -19,10 +25,16 @@ public class EsIndexInitializer {
 
     @PostConstruct
     public void initIndex() {
-        IndexOperations indexOps = elasticsearchOperations.indexOps(AlbumInfoIndex.class);
-        if (!indexOps.exists()) {
-            indexOps.create();
+        IndexOperations albumInfoIndexOps = elasticsearchOperations.indexOps(AlbumInfoIndex.class);
+        IndexOperations suggestIndexOps = elasticsearchOperations.indexOps(SuggestIndex.class);
+        if (!albumInfoIndexOps.exists()) {
+            albumInfoIndexOps.create();
             LOG.info("ES 索引 [albuminfo] 创建成功");
+        }
+
+        if (!suggestIndexOps.exists()){
+            suggestIndexOps.create();
+            LOG.info("ES 索引 [suggestinfo] 创建成功");
         }
     }
 }

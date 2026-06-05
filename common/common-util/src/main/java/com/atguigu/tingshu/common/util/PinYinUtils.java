@@ -23,7 +23,9 @@ public class PinYinUtils {
      * 汉字转拼音
      */
     public static String toHanyuPinyin(String hanzi) {
-        if(StringUtils.isEmpty(hanzi)) return "";
+        if(StringUtils.isEmpty(hanzi)) {
+            return "";
+        }
         char[] chars = hanzi.trim().toCharArray();
         String hanyupinyin = "";
 
@@ -71,8 +73,8 @@ public class PinYinUtils {
                     hanyupinyin += chars[i];
                 }
             }
-        } catch (BadHanyuPinyinOutputFormatCombination e) {
-            log.error("字符不能转成汉语拼音");
+        } catch (Exception e) {
+            log.error("字符不能转为汉语拼音{}", e.getMessage());
         }
 
         return hanyupinyin;
@@ -110,8 +112,8 @@ public class PinYinUtils {
                     firstPinyin.append(chars[i]);
                 }
             }
-        } catch (BadHanyuPinyinOutputFormatCombination e) {
-            log.error("字符不能转为汉语拼音");
+        } catch (Exception e) {
+            log.error("字符不能转为汉语拼音{}", e.getMessage());
         }
 
         return firstPinyin.toString();

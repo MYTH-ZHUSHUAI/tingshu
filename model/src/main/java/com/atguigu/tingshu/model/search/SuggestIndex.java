@@ -17,6 +17,9 @@ public class SuggestIndex {
     @Id
     private String id;
 
+    @Field(type = FieldType.Long)
+    private Long albumId;
+
     @Field(type = FieldType.Text, analyzer = "standard")
     private String title;
 

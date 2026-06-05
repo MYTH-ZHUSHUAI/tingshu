@@ -38,7 +38,7 @@
         <wxpay.version>0.2.9</wxpay.version>
         <redisson.version>3.20.0</redisson.version>
         <guava.version>23.0</guava.version>
-        <pinyin4j.version>2.5.0</pinyin4j.version>
+        <pinyin4j.version>2.5.1</pinyin4j.version>
         <spring-kafka.version>3.0.4</spring-kafka.version>
         <kafka-clients.version>3.1.0</kafka-clients.version>
         <kafka-streams.version>3.1.0</kafka-streams.version>

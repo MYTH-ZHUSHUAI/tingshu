@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,12 +42,22 @@ public class BaseCategoryServiceImpl
 
 
     /**
-     *
+     * 根据分类1Id查询top7
      *
      */
     @Override
     public List<BaseCategory3> findTopBaseCategory3(Long category1Id) {
         return baseCategory3Mapper.selectTopByCategory1Id(category1Id);
+    }
+
+    @Override
+    public JSONObject getBaseCategoryListById(Long category1Id) {
+
+        List<JSONObject> baseCategoryList = this.getBaseCategoryList();
+        return baseCategoryList.stream()
+                .filter(jsonObject -> Objects.equals(jsonObject.get("categoryId"), category1Id))
+                .findFirst()
+                .orElse(null);
     }
 
 
@@ -88,7 +99,6 @@ public class BaseCategoryServiceImpl
                 .stream()
                 .collect(Collectors.groupingBy(BaseCategoryView::getCategory1Id));
 
-
         // 遍历map，封装 1 级部分
         map1.forEach((categoryId1, baseCategoryViews1) -> {
 
@@ -106,7 +116,6 @@ public class BaseCategoryServiceImpl
             Map<Long, List<BaseCategoryView>> map2 = baseCategoryViews1
                     .stream()
                     .collect(Collectors.groupingBy(BaseCategoryView::getCategory2Id));
-
 
             map2.forEach((categoryId2, baseCategoryViews2) -> {
                 JSONObject jsonObject2 = new JSONObject();
@@ -138,10 +147,6 @@ public class BaseCategoryServiceImpl
 
             finalList.add(jsonObject1);
         });
-
-
         return finalList;
     }
-
-
 }

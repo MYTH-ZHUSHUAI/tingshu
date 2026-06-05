@@ -18,10 +18,13 @@ import com.atguigu.tingshu.common.execption.GuiguException;
 import com.atguigu.tingshu.model.album.AlbumAttributeValue;
 import com.atguigu.tingshu.model.album.AlbumInfo;
 import com.atguigu.tingshu.model.album.BaseCategoryView;
+import com.atguigu.tingshu.common.util.PinYinUtils;
 import com.atguigu.tingshu.model.search.AlbumInfoIndex;
 import com.atguigu.tingshu.model.search.AttributeValueIndex;
+import com.atguigu.tingshu.model.search.SuggestIndex;
 import com.atguigu.tingshu.query.search.AlbumIndexQuery;
 import com.atguigu.tingshu.search.repo.AlbumIndexRepository;
+import com.atguigu.tingshu.search.repo.SuggestIndexRepository;
 import com.atguigu.tingshu.search.service.SearchService;
 import com.atguigu.tingshu.user.client.UserInfoFeignClient;
 import com.atguigu.tingshu.vo.album.AlbumStatVo;
@@ -35,11 +38,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import org.springframework.data.elasticsearch.core.suggest.Completion;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -51,6 +57,9 @@ public class SearchServiceImpl implements SearchService {
 
     @Resource
     private AlbumIndexRepository albumIndexRepository;
+
+    @Resource
+    private SuggestIndexRepository suggestIndexRepository;
 
     @Resource
     private AlbumInfoFeignClient albumInfoFeignClient;
@@ -308,6 +317,8 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public void lowerAlbum(Long albumId) {
+        // 下架前先按 albumId 清除搜索提词数据
+        suggestIndexRepository.deleteByAlbumId(albumId);
         albumIndexRepository.deleteById(albumId);
     }
 
@@ -378,6 +389,46 @@ public class SearchServiceImpl implements SearchService {
         albumInfoIndex.setHotScore(hotScore);
 
         albumIndexRepository.save(albumInfoIndex);
+
+        // 上架时添加搜索提词数据，支持中文/拼音/首字母自动补全
+        saveSuggestIndex(albumInfoIndex);
+    }
+
+    /**
+     * 保存搜索提词数据到 suggestinfo 索引
+     * 三个维度：专辑标题、专辑简介、主播名称
+     * 每种维度三种匹配方式：中文原文(keyword)、全拼(keywordPinyin)、首字母(keywordSequence)
+     */
+    private void saveSuggestIndex(AlbumInfoIndex albumInfoIndex) {
+        // 专辑标题提词
+        SuggestIndex titleSuggest = new SuggestIndex();
+        titleSuggest.setId(UUID.randomUUID().toString().replaceAll("-", ""));
+        titleSuggest.setAlbumId(albumInfoIndex.getId());
+        titleSuggest.setTitle(albumInfoIndex.getAlbumTitle());
+        titleSuggest.setKeyword(new Completion(new String[]{albumInfoIndex.getAlbumTitle()}));
+        titleSuggest.setKeywordPinyin(new Completion(new String[]{PinYinUtils.toHanyuPinyin(albumInfoIndex.getAlbumTitle())}));
+        titleSuggest.setKeywordSequence(new Completion(new String[]{PinYinUtils.getFirstLetter(albumInfoIndex.getAlbumTitle())}));
+        suggestIndexRepository.save(titleSuggest);
+
+        // 专辑简介提词
+        SuggestIndex introSuggest = new SuggestIndex();
+        introSuggest.setId(UUID.randomUUID().toString().replaceAll("-", ""));
+        introSuggest.setAlbumId(albumInfoIndex.getId());
+        introSuggest.setTitle(albumInfoIndex.getAlbumIntro());
+        introSuggest.setKeyword(new Completion(new String[]{albumInfoIndex.getAlbumIntro()}));
+        introSuggest.setKeywordPinyin(new Completion(new String[]{PinYinUtils.toHanyuPinyin(albumInfoIndex.getAlbumIntro())}));
+        introSuggest.setKeywordSequence(new Completion(new String[]{PinYinUtils.getFirstLetter(albumInfoIndex.getAlbumIntro())}));
+        suggestIndexRepository.save(introSuggest);
+
+        // 主播名称提词
+        SuggestIndex announcerSuggest = new SuggestIndex();
+        announcerSuggest.setId(UUID.randomUUID().toString().replaceAll("-", ""));
+        announcerSuggest.setAlbumId(albumInfoIndex.getId());
+        announcerSuggest.setTitle(albumInfoIndex.getAnnouncerName());
+        announcerSuggest.setKeyword(new Completion(new String[]{albumInfoIndex.getAnnouncerName()}));
+        announcerSuggest.setKeywordPinyin(new Completion(new String[]{PinYinUtils.toHanyuPinyin(albumInfoIndex.getAnnouncerName())}));
+        announcerSuggest.setKeywordSequence(new Completion(new String[]{PinYinUtils.getFirstLetter(albumInfoIndex.getAnnouncerName())}));
+        suggestIndexRepository.save(announcerSuggest);
     }
 
 
